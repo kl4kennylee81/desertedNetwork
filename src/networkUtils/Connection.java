@@ -1,47 +1,66 @@
 package networkUtils;
 
 import java.net.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.io.*;
+import networkUtils.Message;
 
 public class Connection {
 
-	Socket sock;
-    BufferedReader reader;
-    DataOutputStream writer;
-    
-    public Connection(Socket s) throws IOException{
-    	sock = s;
-    	reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-    	writer = new DataOutputStream(s.getOutputStream());
-    }
+	SocketChannel sChannel;
+	Selector selector;
 	
-	public int getRemotePort(){
-		return sock.getPort();
+	
+	boolean isReading;
+	boolean isWritable;
+	
+	
+
+	public Connection(SocketChannel s, Selector select) throws IOException {
+		sChannel = s;
+
+		// set nonblocking
+		sChannel.configureBlocking(false);
+		selector = select;
+	}
+
+	public SocketChannel getSocketChannel() {
+		return sChannel;
 	}
 	
-	public InetAddress getRemoteAddress(){
-		return sock.getInetAddress();
+	public Selector getSelector(){
+		return selector;
 	}
-	
-	public InetAddress getLocalAddress(){
-		return sock.getLocalAddress();
+
+	public int getRemotePort() {
+		return getSocketChannel().socket().getPort();
 	}
-	
-	public int getLocalPort(){
-		return sock.getLocalPort();
+
+	public InetAddress getRemoteAddress() {
+		return getSocketChannel().socket().getInetAddress();
 	}
-	
-	public void closeConnection(){
-		
+
+	public InetAddress getLocalAddress() {
+		return getSocketChannel().socket().getLocalAddress();
 	}
-	
-	public String read() throws IOException{
-		return reader.readLine();
+
+	public int getLocalPort() {
+		return getSocketChannel().socket().getLocalPort();
 	}
-	
-	public int write(String m) throws IOException{
-		int size_before = writer.size();
-		writer.writeBytes(m);
-		return writer.size() - size_before;
+
+	public void closeConnection() throws IOException {
+		getSocketChannel().close();
 	}
+//
+//	public String read() throws IOException {
+//		if (!isReading){
+//			isReading = true;
+//			getSocketChannel().register(getSelector(), SelectionKey.OP_READ);
+//		}
+//	}
+//
+//	public int write(String m) throws IOException {
+//	}
 }

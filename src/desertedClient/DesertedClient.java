@@ -2,93 +2,85 @@ package desertedClient;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.util.Iterator;
-import java.util.Set;
-/*from  ww w  .  ja v  a2 s.c  om*/
-
+import java.util.concurrent.Future;
+/* w  w w  .  j a v a2s . c o  m*/
 public class DesertedClient {
-  static BufferedReader userInputReader = null;
-
-  public static boolean processReadySet(Set readySet) throws Exception {
-    Iterator iterator = readySet.iterator();
-    while (iterator.hasNext()) {
-      SelectionKey key = (SelectionKey)
-       iterator.next();
-      iterator.remove();
-      if (key.isConnectable()) {
-        boolean connected = processConnect(key);
-        if (!connected) {
-          return true; // Exit
-        }
-      }
-      if (key.isReadable()) {
-        String msg = processRead(key);
-        System.out.println("[Server]: " + msg);
-      }
-      if (key.isWritable()) {
-        System.out.print("Please enter a message(Bye to quit):");
-//        String msg = userInputReader.readLine();
-        
-//        if (msg.equalsIgnoreCase("bye")) {
-//          return true; // Exit
-//        }
-//        SocketChannel sChannel = (SocketChannel) key.channel();
-//        ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-//        sChannel.write(buffer);
-      }
-    }
-    return false; // Not done yet
-  }
-  public static boolean processConnect(SelectionKey key) throws Exception{
-    SocketChannel channel = (SocketChannel) key.channel();
-    while (channel.isConnectionPending()) {
-      channel.finishConnect();
-    }
-    return true;
-  }
-  public static String processRead(SelectionKey key) throws Exception {
-    SocketChannel sChannel = (SocketChannel) key.channel();
-    ByteBuffer buffer = ByteBuffer.allocate(1024);
-    sChannel.read(buffer);
-    buffer.flip();
-    Charset charset = Charset.forName("UTF-8");
-    CharsetDecoder decoder = charset.newDecoder();
-    CharBuffer charBuffer = decoder.decode(buffer);
-    String msg = charBuffer.toString();
-    return msg;
-  }
   public static void main(String[] args) throws Exception {
-    InetAddress serverIPAddress = InetAddress.getByName("localhost");
-    int port = 19000;
-    InetSocketAddress serverAddress = new InetSocketAddress(
-        serverIPAddress, port);
-    Selector selector = Selector.open();
-    SocketChannel channel = SocketChannel.open();
-    channel.configureBlocking(false);
-    channel.connect(serverAddress);
-    int operations = SelectionKey.OP_CONNECT | SelectionKey.OP_READ
-        | SelectionKey.OP_WRITE;
-    channel.register(selector, operations);
+    AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
+    SocketAddress serverAddr = new InetSocketAddress("localhost", 8989);
+    Future<Void> result = channel.connect(serverAddr);
+    result.get();
+    System.out.println("Connected");
+    Attachment attach = new Attachment();
+    attach.channel = channel;
+    attach.buffer = ByteBuffer.allocate(2048);
+    attach.isRead = false;
+    attach.mainThread = Thread.currentThread();
 
-    userInputReader = new BufferedReader(new InputStreamReader(System.in));
-    while (true) {
-      if (selector.selectNow() > 0) {
-    	 System.out.println("hi");
-        boolean doneStatus = processReadySet(selector.selectedKeys());
-        if (doneStatus) {
-          break;
-        }
+    Charset cs = Charset.forName("UTF-8");
+    String msg = "Hello";
+    byte[] data = msg.getBytes(cs);
+    attach.buffer.put(data);
+    attach.buffer.flip();
+
+    ReadWriteHandler readWriteHandler = new ReadWriteHandler();
+    channel.write(attach.buffer, attach, readWriteHandler);
+    attach.mainThread.join();
+  }
+}
+class Attachment {
+  AsynchronousSocketChannel channel;
+  ByteBuffer buffer;
+  Thread mainThread;
+  boolean isRead;
+}
+class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
+  @Override
+  public void completed(Integer result, Attachment attach) {
+    if (attach.isRead) {
+      attach.buffer.flip();
+      Charset cs = Charset.forName("UTF-8");
+      int limits = attach.buffer.limit();
+      byte bytes[] = new byte[limits];
+      attach.buffer.get(bytes, 0, limits);
+      String msg = new String(bytes, cs);
+      System.out.format("Server Responded: "+ msg);
+      try {
+        msg = this.getTextFromUser();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
+      if (msg.equalsIgnoreCase("bye")) {
+        attach.mainThread.interrupt();
+        return;
+      }
+      attach.buffer.clear();
+      byte[] data = msg.getBytes(cs);
+      attach.buffer.put(data);
+      attach.buffer.flip();
+      attach.isRead = false; // It is a write
+      attach.channel.write(attach.buffer, attach, this);
+    }else {
+      attach.isRead = true;
+      attach.buffer.clear();
+      attach.channel.read(attach.buffer, attach, this);
     }
-    channel.close();
+  }
+  @Override
+  public void failed(Throwable e, Attachment attach) {
+    e.printStackTrace();
+  }
+  private String getTextFromUser() throws Exception{
+    System.out.print("Please enter a  message  (Bye  to quit):");
+    BufferedReader consoleReader = new BufferedReader(
+        new InputStreamReader(System.in));
+    String msg = consoleReader.readLine();
+    return msg;
   }
 }

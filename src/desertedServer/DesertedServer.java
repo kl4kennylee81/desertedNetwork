@@ -1,63 +1,102 @@
 package desertedServer;
-
-import java.net.InetAddress;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
-/*from  w w w  .ja  va2 s.c  o m*/
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.nio.charset.Charset;
 
 public class DesertedServer {
 	
   public static void main(String[] args) throws Exception {
-    InetAddress hostIPAddress = InetAddress.getByName("localhost");
-    int port = 19000;
-    Selector selector = Selector.open();
-    ServerSocketChannel ssChannel = ServerSocketChannel.open();
-    ssChannel.configureBlocking(false);
-    ssChannel.socket().bind(new InetSocketAddress(hostIPAddress, port));
-    ssChannel.register(selector, SelectionKey.OP_ACCEPT);
-    while (true) {
-      System.out.println("hi");
-      if (selector.select() <= 0) {
-        continue;
-      }
-      processReadySet(selector.selectedKeys());
+    AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel
+        .open();
+    String host = "localhost";
+    int port = 8989;
+    InetSocketAddress sAddr = new InetSocketAddress(host, port);
+    server.bind(sAddr);
+    System.out.format("Server is listening at %s%n", sAddr);
+    Attachment attach = new Attachment();
+    attach.server = server;
+    server.accept(attach, new ConnectionHandler());
+    Thread.currentThread().join();
+  }
+}
+class Attachment {
+  AsynchronousServerSocketChannel server;
+  AsynchronousSocketChannel client;
+  ByteBuffer buffer;
+  SocketAddress clientAddr;
+  boolean isRead;
+}
+
+class ConnectionHandler implements
+    CompletionHandler<AsynchronousSocketChannel, Attachment> {
+  @Override
+  public void completed(AsynchronousSocketChannel client, Attachment attach) {
+    try {
+      SocketAddress clientAddr = client.getRemoteAddress();
+      System.out.format("Accepted a  connection from  %s%n", clientAddr);
+      attach.server.accept(attach, this);
+      ReadWriteHandler rwHandler = new ReadWriteHandler();
+      Attachment newAttach = new Attachment();
+      newAttach.server = attach.server;
+      newAttach.client = client;
+      newAttach.buffer = ByteBuffer.allocate(2048);
+      newAttach.isRead = true;
+      newAttach.clientAddr = clientAddr;
+      client.read(newAttach.buffer, newAttach, rwHandler);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
-  public static void processReadySet(Set readySet) throws Exception {
-    Iterator iterator = readySet.iterator();
-    while (iterator.hasNext()) {
-      SelectionKey key = (SelectionKey) iterator.next();
-      iterator.remove();
-      if (key.isAcceptable()) {
-        ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
-        SocketChannel sChannel = (SocketChannel) ssChannel.accept();
-        sChannel.configureBlocking(false);
-        sChannel.register(key.selector(), SelectionKey.OP_READ);
+
+  @Override
+  public void failed(Throwable e, Attachment attach) {
+    System.out.println("Failed to accept a  connection.");
+    e.printStackTrace();
+  }
+}
+
+class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
+  @Override
+  public void completed(Integer result, Attachment attach) {
+    if (result == -1) {
+      try {
+        attach.client.close();
+        System.out.format("Stopped   listening to the   client %s%n",
+            attach.clientAddr);
+      } catch (IOException ex) {
+        ex.printStackTrace();
       }
-      if (key.isReadable()) {
-        String msg = processRead(key);
-        if (msg.length() > 0) {
-          SocketChannel sChannel = (SocketChannel) key.channel();
-          ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-          sChannel.write(buffer);
-        }
-      }
+      return;
+    }
+
+    if (attach.isRead) {
+      attach.buffer.flip();
+      int limits = attach.buffer.limit();
+      byte bytes[] = new byte[limits];
+      attach.buffer.get(bytes, 0, limits);
+      Charset cs = Charset.forName("UTF-8");
+      String msg = new String(bytes, cs);
+      System.out.format("Client at  %s  says: %s%n", attach.clientAddr,
+          msg);
+      attach.isRead = false; // It is a write
+      attach.buffer.rewind();
+
+    } else {
+      // Write to the client
+      attach.client.write(attach.buffer, attach, this);
+      attach.isRead = true;
+      attach.buffer.clear();
+      attach.client.read(attach.buffer, attach, this);
     }
   }
-  public static String processRead(SelectionKey key) throws Exception {
-    SocketChannel sChannel = (SocketChannel) key.channel();
-    ByteBuffer buffer = ByteBuffer.allocate(1024);
-    int bytesCount = sChannel.read(buffer);
-    if (bytesCount > 0) {
-      buffer.flip();
-      return new String(buffer.array());
-    }
-    return "NoMessage";
+
+  @Override
+  public void failed(Throwable e, Attachment attach) {
+    e.printStackTrace();
   }
 }
