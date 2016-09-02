@@ -6,24 +6,23 @@ import networkUtils.Message.MessageType;
 public class NormalMessage extends Message{
 
 	String text;
+	String from;
+	String to;
 	
-	Integer fromId;
-	Integer toId;
-	
-	public NormalMessage(int from,int to,String text) {
+	public NormalMessage(String from,String to,String text) {
 		super();
 		this.m_type = MessageType.NORMAL;
 		this.text = text;
-		this.fromId = from;
-		this.toId = to;
+		this.from = from;
+		this.to = to;
 	}
 	
 	public NormalMessage(String msg) {
 		super();
 		this.m_type = MessageType.NORMAL;
 		this.text = msg;
-		this.fromId = -1;
-		this.toId = -1;
+		this.from = "";
+		this.to = "";
 	}
 
 	@Override
@@ -31,12 +30,12 @@ public class NormalMessage extends Message{
 		return this.text;
 	}
 	
-	public int getDest(){
-		return toId;
+	public String getTo(){
+		return this.to;
 	}
 	
-	public int getFrom(){
-		return fromId;
+	public String getFrom(){
+		return this.from;
 	}
 	
 	@Override

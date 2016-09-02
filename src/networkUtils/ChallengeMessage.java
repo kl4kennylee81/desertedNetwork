@@ -4,11 +4,19 @@ import flexjson.JSONSerializer;
 
 public class ChallengeMessage extends Message {
 
+	String from;
+	String to;
 	String opponent;
 	
-	
-	public ChallengeMessage(int from, int to,String opponent) {
+	public ChallengeMessage(){
 		super();
+		this.m_type = MessageType.CHALLENGE;
+	}
+	
+	public ChallengeMessage(String from,String to,String opponent) {
+		super();
+		this.from = from;
+		this.to = to;
 		this.m_type = MessageType.CHALLENGE;
 		this.opponent = opponent;
 	}
@@ -22,6 +30,10 @@ public class ChallengeMessage extends Message {
 	public String toString() {
 		String m = new JSONSerializer().deepSerialize(this);
 		return m;
+	}
+	
+	public String getOpponent(){
+		return this.opponent;
 	}
 
 }

@@ -21,7 +21,7 @@ import networkUtils.NormalMessage;
 import networkUtils.UsernameMessage;
 
 
-public class DesertedClient {
+public class DesertedClient2 {
   
 	String username;
 	String oppUsername;
@@ -37,7 +37,7 @@ public class DesertedClient {
 	
 	public enum NetworkState {READ,WRITE,NORMAL}
 	
-	public DesertedClient(Connection c,boolean sendFirst){
+	public DesertedClient2(Connection c,boolean sendFirst){
 	  connect = c;
 	  oppUsername = "";
 	  gstate = GameState.PRE;
@@ -187,7 +187,7 @@ public class DesertedClient {
   public static void main(String[] args) throws Exception {
 
     Connection c = new Connection();
-    DesertedClient dc = new DesertedClient(c,true);
+    DesertedClient dc = new DesertedClient(c,false);
     dc.connect.connect("localhost", 8989);
     
     int count = 0;

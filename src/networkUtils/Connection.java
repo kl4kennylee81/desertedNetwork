@@ -81,7 +81,7 @@ public class Connection {
 	public String read() throws IOException {
 		if (readFuture != null){
 			if (readFuture.isDone()) {
-			     String s = byteBufferToString(readBuffer);
+			     String s = Message.byteBufferToString(readBuffer);
 			     readFuture = null;
 			     return s;
 			}
@@ -94,7 +94,7 @@ public class Connection {
 			readFuture = sChannel.read(readBuffer);
 			
 			if (readFuture.isDone()) {
-			     String s = byteBufferToString(readBuffer);
+			     String s = Message.byteBufferToString(readBuffer);
 			     readFuture = null;
 			     return s;
 			}
@@ -110,19 +110,26 @@ public class Connection {
 		return msg;
 	}
 	
-	public static String byteBufferToString(ByteBuffer bb){
-	      Charset cs = Charset.forName("UTF-8");
-	      int limits = bb.limit();
-	      byte bytes[] = new byte[limits];
-	      bb.rewind();
-	      bb.get(bytes, 0, limits);
-	      bb.rewind();
-	      String msg = new String(bytes, cs);
-	      return msg;
-	}
-	
 	public Integer write(Message msg) throws IOException, InterruptedException, ExecutionException{
 		return write(msg.getMessage());
+	}
+	
+	public boolean isDoneWriting() throws InterruptedException, ExecutionException{
+		if (writeFuture != null && writeFuture.isDone()){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	public boolean isDoneReading() {
+		if (readFuture != null && readFuture.isDone()){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
 	public Integer write(String msg) throws IOException, InterruptedException, ExecutionException {
@@ -137,11 +144,7 @@ public class Connection {
 			}
 		}
 		else {
-		    writeBuffer.clear();
-		    Charset cs = Charset.forName("UTF-8");
-		    byte[] data = msg.getBytes(cs);
-		    writeBuffer.put(data);
-		    writeBuffer.flip();
+			Message.strToByteBuffer(writeBuffer, msg);
 			writeFuture = sChannel.write(writeBuffer);
 			
 			if (writeFuture.isDone()){

@@ -8,13 +8,13 @@ public class InGameMessage extends Message {
 	// the message will be of type of list of actionNodes
 	String actionNodeList;
 	
-	Integer fromId;
-	Integer toId;
+	String from;
+	String to;
 
-	public InGameMessage(int from, int to,String actionNodeList) {
+	public InGameMessage(String from, String to,String actionNodeList) {
 		this.m_type = MessageType.INGAME;
-		fromId = from;
-		toId = to;
+		this.from = from;
+		this.to = to;
 		this.actionNodeList = actionNodeList;
 	}
 
@@ -24,12 +24,12 @@ public class InGameMessage extends Message {
 		return actionNodeList;
 	}
 	
-	public int getDest(){
-		return toId;
+	public String getTo(){
+		return to;
 	}
 	
-	public int getFrom(){
-		return fromId;
+	public String getFrom(){
+		return from;
 	}
 	
 	@Override
