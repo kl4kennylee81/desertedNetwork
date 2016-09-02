@@ -7,8 +7,23 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import networkUtils.Connection;
+
+import networkUtils.Message;
 
 public class DesertedServer {
+	
+	
+	ConcurrentHashMap<Connection,Connection> p1vp2;
+	Queue<Connection> waitingQueue;
+	
+	public DesertedServer(){
+		waitingQueue = new LinkedBlockingQueue<Connection>();
+		p1vp2 = new ConcurrentHashMap<Connection,Connection>();
+	}
 	
   public static void main(String[] args) throws Exception {
     AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel
@@ -85,10 +100,11 @@ class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
           msg);
       attach.isRead = false; // It is a write
       attach.buffer.rewind();
+      attach.client.write(attach.buffer, attach, this);
 
     } else {
       // Write to the client
-      attach.client.write(attach.buffer, attach, this);
+      //attach.client.write(attach.buffer, attach, this);
       attach.isRead = true;
       attach.buffer.clear();
       attach.client.read(attach.buffer, attach, this);
