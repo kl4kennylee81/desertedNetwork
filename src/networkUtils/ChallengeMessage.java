@@ -11,6 +11,9 @@ public class ChallengeMessage extends Message {
 	public ChallengeMessage(){
 		super();
 		this.m_type = MessageType.CHALLENGE;
+		from = "";
+		to = "";
+		opponent = "";
 	}
 	
 	public ChallengeMessage(String from,String to,String opponent) {
@@ -19,11 +22,6 @@ public class ChallengeMessage extends Message {
 		this.to = to;
 		this.m_type = MessageType.CHALLENGE;
 		this.opponent = opponent;
-	}
-
-	@Override
-	public String getMessage() {
-		return this.opponent;
 	}
 
 	@Override

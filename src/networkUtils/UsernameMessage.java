@@ -1,10 +1,18 @@
 package networkUtils;
 
 import flexjson.JSONSerializer;
+import networkUtils.Message.MessageType;
 
 public class UsernameMessage extends Message {
 
 	String username;
+	
+	public UsernameMessage(){
+		super();
+		m_type = MessageType.USERNAME;
+		username = "";
+	}
+	
 	
 	public UsernameMessage(String username) {
 		super();
@@ -12,11 +20,6 @@ public class UsernameMessage extends Message {
 		this.username = username;
 	}
 
-	@Override
-	public String getMessage() {
-		return this.username;
-	}
-	
 	public String getUsername(){
 		return this.username;
 	}

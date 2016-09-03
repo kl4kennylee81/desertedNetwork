@@ -48,7 +48,7 @@ public class DesertedClient2 {
 	  sentMessage = sendFirst;
     }
 	
-	public void processSendMsg() throws Exception{
+	public void processState() throws Exception{
 		switch (gstate){
 		case INGAME:
 			processInGameState();
@@ -74,7 +74,7 @@ public class DesertedClient2 {
 				if (s != null){
 					Message m = Message.jsonToMsg(s);
 					InGameMessage igm = (InGameMessage) m;
-					String msg = igm.getMessage();
+					String msg = igm.toString();
 					System.out.println(msg);
 					this.sentMessage = false;
 				}
@@ -187,22 +187,22 @@ public class DesertedClient2 {
   public static void main(String[] args) throws Exception {
 
     Connection c = new Connection();
-    DesertedClient dc = new DesertedClient(c,false);
+    DesertedClient2 dc = new DesertedClient2(c,false);
     dc.connect.connect("localhost", 8989);
     
-    int count = 0;
     while(true){
-	    String s = getTextFromUser();
-	    Message msg = new NormalMessage(s);
-	    while (c.write(msg) == null){
-	    }
-	    
-	    Message response = c.readMsg();
-	    while(response == null){
-	    	response = c.readMsg();
-	    }
-	    count++;
-	    System.out.printf("%d:%s\n",count,response.getMessage());
+//	    String s = getTextFromUser();
+//	    Message msg = new NormalMessage(s);
+//	    while (c.write(msg) == null){
+//	    }
+//	    
+//	    Message response = c.readMsg();
+//	    while(response == null){
+//	    	response = c.readMsg();
+//	    }
+//	    count++;
+//	    System.out.printf("%d:%s\n",count,response.getMessage());
+    	dc.processState();
     }
     
     

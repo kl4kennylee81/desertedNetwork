@@ -18,10 +18,6 @@ public abstract class Message {
 		m_type = MessageType.NORMAL;
 	}
 	
-	public String getMessage(){
-		return "";
-	}
-	
 	public MessageType getType(){
 		return this.m_type;
 	}
@@ -67,16 +63,8 @@ public abstract class Message {
 	}
 	
 	public static Message jsonToMsg(String s){
-		@SuppressWarnings("unchecked")
-		Message m = new JSONDeserializer<Message>()
-				.use(null, new TypeLocator<MessageType>("m_type")
-                .add(Message.MessageType.NORMAL, NormalMessage.class)
-                .add(Message.MessageType.USERNAME, UsernameMessage.class)
-                .add(Message.MessageType.CHALLENGE, ChallengeMessage.class)
-                .add(Message.MessageType.INGAME, InGameMessage.class)
-                .add(Message.MessageType.LOBBY, LobbyMessage.class)
-                .add(Message.MessageType.BACK, BackMessage.class))
-                .deserialize(s);
-		return m;	    
+		Message m = (new JSONDeserializer<Message>()).deserialize(s);
+		System.out.println(m.toString());
+		return m;
 	}
 }

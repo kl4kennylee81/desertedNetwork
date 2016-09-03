@@ -1,6 +1,7 @@
 package networkUtils;
 
 import flexjson.JSONSerializer;
+import networkUtils.Message.MessageType;
 
 public class InGameMessage extends Message {
 	
@@ -10,18 +11,20 @@ public class InGameMessage extends Message {
 	
 	String from;
 	String to;
+	
+	public InGameMessage(){
+		super();
+		m_type = MessageType.INGAME;
+		from = "";
+		to = "";
+		actionNodeList = "";
+	}
 
 	public InGameMessage(String from, String to,String actionNodeList) {
 		this.m_type = MessageType.INGAME;
 		this.from = from;
 		this.to = to;
 		this.actionNodeList = actionNodeList;
-	}
-
-	@Override
-	public String getMessage() {
-		// TODO Auto-generated method stub
-		return actionNodeList;
 	}
 	
 	public String getTo(){

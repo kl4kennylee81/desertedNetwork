@@ -111,7 +111,7 @@ public class Connection {
 	}
 	
 	public Integer write(Message msg) throws IOException, InterruptedException, ExecutionException{
-		return write(msg.getMessage());
+		return write(msg.toString());
 	}
 	
 	public boolean isDoneWriting() throws InterruptedException, ExecutionException{

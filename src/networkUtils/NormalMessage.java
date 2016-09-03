@@ -9,6 +9,14 @@ public class NormalMessage extends Message{
 	String from;
 	String to;
 	
+	public NormalMessage(){
+		super();
+		m_type = MessageType.NORMAL;
+		text = "";
+		from = "";
+		to = "";
+	}
+	
 	public NormalMessage(String from,String to,String text) {
 		super();
 		this.m_type = MessageType.NORMAL;
@@ -23,11 +31,6 @@ public class NormalMessage extends Message{
 		this.text = msg;
 		this.from = "";
 		this.to = "";
-	}
-
-	@Override
-	public String getMessage() {
-		return this.text;
 	}
 	
 	public String getTo(){

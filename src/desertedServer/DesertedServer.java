@@ -115,7 +115,7 @@ public class DesertedServer {
 	// default host and port
 	String host = "localhost";
 	int port = 8989;
-	if (args.length < 2){
+	if (args.length > 2){
 		host = args[0];
 		port = Integer.parseInt(args[1]);
 	}

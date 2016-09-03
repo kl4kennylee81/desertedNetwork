@@ -1,6 +1,7 @@
 package networkUtils;
 
 import flexjson.JSONSerializer;
+import networkUtils.Message.MessageType;
 
 public class BackMessage extends Message {
 	
@@ -9,28 +10,32 @@ public class BackMessage extends Message {
 	// properly filled in with a set of attributes necessary to carry out the operation
 	String disconnect;
 	
-	Integer fromId;
-	Integer toId;
+	String from;
+	String to;
+	
+	public BackMessage(){
+		super();
+		m_type = MessageType.INGAME;
+		from = "";
+		to = "";
+		disconnect = "";
+	}
 
-	public BackMessage(int from, int to,String disconnect) {
-		fromId = from;
-		toId = to;
+
+	public BackMessage(String from,String to,String disconnect) {
+		this.from = from;
+		this.to = to;
 		this.m_type = MessageType.BACK;
 		this.disconnect = disconnect;
 		// TODO Auto-generated constructor stub
 	}
-
-	@Override
-	public String getMessage() {
-		return disconnect;
+	
+	public String getDest(){
+		return to;
 	}
 	
-	public int getDest(){
-		return toId;
-	}
-	
-	public int getFrom(){
-		return fromId;
+	public String getFrom(){
+		return from;
 	}
 
 	@Override

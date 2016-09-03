@@ -3,10 +3,17 @@ package networkUtils;
 import java.util.ArrayList;
 
 import flexjson.JSONSerializer;
+import networkUtils.Message.MessageType;
 
 public class LobbyMessage extends Message{
 	
 	ArrayList<String> usernames;
+	
+	public LobbyMessage(){
+		super();
+		m_type = MessageType.LOBBY;
+		usernames = null;
+	}
 
 	public LobbyMessage(ArrayList<String> usernames) {
 		super();
