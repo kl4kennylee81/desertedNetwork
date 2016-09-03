@@ -115,7 +115,10 @@ public class Connection {
 	}
 	
 	public boolean isDoneWriting() throws InterruptedException, ExecutionException{
-		if (writeFuture != null && writeFuture.isDone()){
+		if (writeFuture == null){
+			return true;
+		}
+		else if (writeFuture != null && writeFuture.isDone()){
 			return true;
 		}
 		else{
@@ -124,7 +127,10 @@ public class Connection {
 	}
 	
 	public boolean isDoneReading() {
-		if (readFuture != null && readFuture.isDone()){
+		if (readFuture == null){
+			return true;
+		}
+		else if (readFuture != null && readFuture.isDone()){
 			return true;
 		}
 		else{

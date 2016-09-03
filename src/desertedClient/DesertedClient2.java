@@ -71,6 +71,7 @@ public class DesertedClient2 {
 		case NORMAL:
 			if (this.sentMessage){
 				String s = this.connect.read();
+				System.out.println("haha");
 				if (s != null){
 					Message m = Message.jsonToMsg(s);
 					InGameMessage igm = (InGameMessage) m;
@@ -126,6 +127,7 @@ public class DesertedClient2 {
 			break;
 		case READ:
 			if (this.connect.isDoneReading()){
+				System.out.println("hi");
 				this.nstate = NetworkState.NORMAL;
 			}
 			break;

@@ -88,22 +88,26 @@ public class DesertedServer {
 	public String getChallenger(AsynchronousSocketChannel user) throws InterruptedException{
 		
 		AsynchronousSocketChannel opp = waitingQueue.poll();
-		if (opp != null) {
-			p1vp2.put(user, opp);
-			p1vp2.put(opp, user);
-			waitingQueue.notifyAll();
-			return getUserFromSocket(opp);
-		}
-		else {
-			boolean addedSelf = false;
-			while (!p1vp2.containsKey(user)){
-				if (!addedSelf){
-					waitingQueue.add(user);
-				}
-				waitingQueue.wait();
+		synchronized(waitingQueue){
+			if (opp != null) {
+				System.out.println("did we pop something\n");
+				p1vp2.put(user, opp);
+				p1vp2.put(opp, user);
+				waitingQueue.notifyAll();
+				return getUserFromSocket(opp);
 			}
-			opp = p1vp2.get(user);
-			return getUserFromSocket(opp);
+			else {
+				boolean addedSelf = false;
+				while (!p1vp2.containsKey(user)){
+					System.out.println("are we waiting\n");
+					if (!addedSelf){
+						waitingQueue.add(user);
+					}
+					waitingQueue.wait();
+				}
+				opp = p1vp2.get(user);
+				return getUserFromSocket(opp);
+			}
 		}
 	}
 	
