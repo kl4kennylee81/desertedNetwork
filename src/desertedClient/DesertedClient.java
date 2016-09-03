@@ -80,7 +80,8 @@ public class DesertedClient {
 				}
 			}
 			else{
-				String msg = "Blaze it 420 from the client2\n";
+				String msg = getTextFromUser();
+				System.out.printf("are we getting text from user%s\n",msg);
 				InGameMessage igm = new InGameMessage(this.username,this.oppUsername,msg);
 				this.sentMessage = true;
 				this.write(igm);
@@ -160,7 +161,6 @@ public class DesertedClient {
 			System.out.println("are we here in normal\n");
 			if (this.sentUsername){
 				String s = this.connect.read();
-				System.out.println("haha");
 				if (s != null){
 					Message m = Message.jsonToMsg(s);
 					LobbyMessage lm = (LobbyMessage) m;

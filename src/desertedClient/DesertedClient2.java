@@ -71,7 +71,6 @@ public class DesertedClient2 {
 		case NORMAL:
 			if (this.sentMessage){
 				String s = this.connect.read();
-				System.out.println("haha");
 				if (s != null){
 					Message m = Message.jsonToMsg(s);
 					InGameMessage igm = (InGameMessage) m;
@@ -81,8 +80,9 @@ public class DesertedClient2 {
 				}
 			}
 			else{
-				String msg = "Blaze it 420 from the client2\n";
-				InGameMessage igm = new InGameMessage(this.username,this.oppUsername,msg);
+				String msg = getTextFromUser();
+				System.out.printf("are we getting text from user%s\n",msg);
+				Message igm = new InGameMessage(this.username,this.oppUsername,msg);
 				this.sentMessage = true;
 				this.write(igm);
 			}
