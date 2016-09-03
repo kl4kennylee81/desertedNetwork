@@ -245,6 +245,7 @@ class ReadWriteHandler implements CompletionHandler<Integer, Attachment> {
 	  
 	  AsynchronousSocketChannel oppSock = attach.server.getPlayersOppSock(playerName);
 	  oppSock.write(m.msgToByteBuffer()).get();
+
   }
   
   public void processUsername(Attachment attach,Message m) throws InterruptedException, ExecutionException{

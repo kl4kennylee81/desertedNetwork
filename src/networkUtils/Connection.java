@@ -17,6 +17,7 @@ public class Connection {
 
 	private static AtomicInteger atomic_int = new AtomicInteger(0);
 	
+	private static int BUFFER_SIZE = 4096;
 	int id;
 	AsynchronousSocketChannel sChannel;
 
@@ -30,20 +31,20 @@ public class Connection {
     	id = atomic_int.incrementAndGet();
 		sChannel = AsynchronousSocketChannel.open();
 		readFuture = null;
-		readBuffer = ByteBuffer.allocate(2048);
+		readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		
 		writeFuture = null;
-		writeBuffer =  ByteBuffer.allocate(2048);
+		writeBuffer =  ByteBuffer.allocate(BUFFER_SIZE);
 	}
 
 	public Connection(AsynchronousSocketChannel s) throws IOException {
     	id = atomic_int.incrementAndGet();
 		sChannel = s;
 		readFuture = null;
-		readBuffer = ByteBuffer.allocate(2048);
+		readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		
 		writeFuture = null;
-		writeBuffer =  ByteBuffer.allocate(2048);
+		writeBuffer =  ByteBuffer.allocate(BUFFER_SIZE);
 	}
 
 	public AsynchronousSocketChannel socketChannel() {

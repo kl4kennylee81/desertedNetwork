@@ -27,6 +27,10 @@ public class InGameMessage extends Message {
 		this.actionNodeList = actionNodeList;
 	}
 	
+	public String getAnList(){
+		return actionNodeList;
+	}
+	
 	public String getTo(){
 		return to;
 	}

@@ -81,8 +81,8 @@ public class DesertedClient {
 			}
 			else{
 				String msg = getTextFromUser();
-				System.out.printf("are we getting text from user%s\n",msg);
 				InGameMessage igm = new InGameMessage(this.username,this.oppUsername,msg);
+				System.out.printf("are we getting text from user%s\n",igm.toString());
 				this.sentMessage = true;
 				this.write(igm);
 			}
